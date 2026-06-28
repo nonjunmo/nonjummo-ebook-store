@@ -248,6 +248,17 @@ pre {
   cursor: pointer;
 }
 
+.text-button.danger {
+  border-color: #f1b7b2;
+  color: #b42318;
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .total {
   display: flex;
   justify-content: space-between;

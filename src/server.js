@@ -394,6 +394,15 @@ function createApp(options = {}) {
     }
   });
 
+  app.post("/admin/products/:id/delete", requireAdmin, async (req, res, next) => {
+    try {
+      await db.deleteProduct(req.params.id);
+      res.redirect("/admin");
+    } catch (error) {
+      next(error);
+    }
+  });
+
   app.post("/admin/orders/:id/payment", requireAdmin, async (req, res, next) => {
     try {
       await db.setPaymentConfirmed(req.params.id, req.body.confirmed === "on");
@@ -407,6 +416,15 @@ function createApp(options = {}) {
     try {
       await db.setDeliveryCompleted(req.params.id, req.body.delivered === "on");
       res.redirect("/admin");
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/admin/orders/:id/delete", requireAdmin, async (req, res, next) => {
+    try {
+      await db.deleteOrder(req.params.id);
+      res.redirect(req.get("referer") && req.get("referer").includes("/admin/orders/completed") ? "/admin/orders/completed" : "/admin");
     } catch (error) {
       next(error);
     }

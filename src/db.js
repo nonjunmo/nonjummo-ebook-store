@@ -119,6 +119,10 @@ function createDatabase(databasePath = process.env.DATABASE_PATH || path.join(pr
     return getProduct(id, { includeInactive: true });
   }
 
+  async function deleteProduct(id) {
+    return db.prepare("DELETE FROM products WHERE id = ?").run(Number(id));
+  }
+
   async function listProducts({ page = 1, pageSize = 10, includeInactive = false } = {}) {
     const offset = (page - 1) * pageSize;
     const where = includeInactive ? "" : "WHERE is_active = 1";
@@ -205,6 +209,10 @@ function createDatabase(databasePath = process.env.DATABASE_PATH || path.join(pr
     });
   }
 
+  async function deleteOrder(id) {
+    return db.prepare("DELETE FROM orders WHERE id = ?").run(Number(id));
+  }
+
   function orderWhereClause({ deliveryCompleted } = {}) {
     if (deliveryCompleted === true) return "WHERE delivery_completed = 1";
     if (deliveryCompleted === false) return "WHERE delivery_completed = 0";
@@ -282,6 +290,8 @@ function createDatabase(databasePath = process.env.DATABASE_PATH || path.join(pr
     close,
     createOrder,
     createProduct,
+    deleteOrder,
+    deleteProduct,
     getProduct,
     getProductsByIds,
     listOrders,

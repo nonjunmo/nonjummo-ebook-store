@@ -346,3 +346,58 @@ test("admin can export all completed orders as CSV and HTML", async () => {
   assert.equal(stillPending[0].id, pending.id);
   close();
 });
+
+test("admin can delete an order from order management", async () => {
+  const { app, db, close } = await buildTestApp();
+  const product = await db.createProduct({
+    title: "Delete Order Product",
+    author: "Nonjummo",
+    price: 7000,
+    summary: "summary",
+    tableOfContents: "toc",
+    hasYoutubeMembership: false,
+    coverImageUrl: "",
+    isActive: true
+  });
+  const order = await db.createOrder({
+    customerName: "Delete Order Customer",
+    phone: "010-delete",
+    receiptType: "cash_receipt",
+    email: "delete-order@example.com",
+    productIds: [product.id]
+  });
+  const agent = request.agent(app);
+
+  await agent.post("/admin/login").type("form").send({ password: "secret" }).expect(302);
+  await agent.post(`/admin/orders/${order.id}/delete`).type("form").expect(302);
+
+  const orders = await db.listOrders();
+  assert.equal(orders.length, 0);
+  const dashboard = await agent.get("/admin");
+  assert.doesNotMatch(dashboard.text, /Delete Order Customer/);
+  close();
+});
+
+test("admin can delete a product from product list", async () => {
+  const { app, db, close } = await buildTestApp();
+  const product = await db.createProduct({
+    title: "Delete Product",
+    author: "Nonjummo",
+    price: 8000,
+    summary: "summary",
+    tableOfContents: "toc",
+    hasYoutubeMembership: false,
+    coverImageUrl: "",
+    isActive: true
+  });
+  const agent = request.agent(app);
+
+  await agent.post("/admin/login").type("form").send({ password: "secret" }).expect(302);
+  await agent.post(`/admin/products/${product.id}/delete`).type("form").expect(302);
+
+  const products = await db.listProducts({ page: 1, pageSize: 10, includeInactive: true });
+  assert.equal(products.items.length, 0);
+  const dashboard = await agent.get("/admin");
+  assert.doesNotMatch(dashboard.text, /Delete Product/);
+  close();
+});
