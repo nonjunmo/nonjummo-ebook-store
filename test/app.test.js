@@ -91,6 +91,49 @@ test("admin product form shows bundled cover image paths", async () => {
   close();
 });
 
+test("admin can edit an existing product", async () => {
+  const { app, db, close } = await buildTestApp();
+  const product = await db.createProduct({
+    title: "수정 전 교재",
+    author: "논준모연구소",
+    price: 12000,
+    summary: "수정 전 소개",
+    tableOfContents: "수정 전 목차",
+    hasYoutubeMembership: false,
+    coverImageUrl: "/img/book-01.jpg",
+    isActive: true
+  });
+  const agent = request.agent(app);
+
+  await agent.post("/admin/login").type("form").send({ password: "secret" }).expect(302);
+  const editPage = await agent.get(`/admin/products/${product.id}/edit`);
+  assert.equal(editPage.status, 200);
+  assert.match(editPage.text, /수정 전 교재/);
+
+  await agent
+    .post(`/admin/products/${product.id}`)
+    .type("form")
+    .send({
+      title: "수정 후 교재",
+      author: "논준모연구소 개정판",
+      price: "18000",
+      summary: "수정 후 소개",
+      tableOfContents: "수정 후 목차",
+      hasYoutubeMembership: "on",
+      coverImageUrl: "/img/book-02.jpg",
+      isActive: "on"
+    })
+    .expect(302);
+
+  const updated = await db.getProduct(product.id, { includeInactive: true });
+  assert.equal(updated.title, "수정 후 교재");
+  assert.equal(updated.author, "논준모연구소 개정판");
+  assert.equal(updated.price, 18000);
+  assert.equal(updated.has_youtube_membership, true);
+  assert.equal(updated.cover_image_url, "/img/book-02.jpg");
+  close();
+});
+
 test("customer can order directly and sees bank account on order page", async () => {
   const { app, db, close } = await buildTestApp();
   const product = await db.createProduct({

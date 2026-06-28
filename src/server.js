@@ -31,6 +31,23 @@ function listCoverImages() {
     .map((file) => `/img/${file}`);
 }
 
+function productFromBody(body) {
+  return {
+    title: (body.title || "").trim(),
+    author: (body.author || "").trim(),
+    price: Number(body.price || 0),
+    summary: (body.summary || "").trim(),
+    tableOfContents: (body.tableOfContents || "").trim(),
+    hasYoutubeMembership: body.hasYoutubeMembership === "on",
+    coverImageUrl: (body.coverImageUrl || "").trim(),
+    isActive: body.isActive === "on"
+  };
+}
+
+function validProduct(product) {
+  return product.title && product.author && product.summary && product.tableOfContents && product.price >= 0;
+}
+
 function createApp(options = {}) {
   const app = express();
   const db = options.db;
@@ -185,6 +202,8 @@ function createApp(options = {}) {
     res.render("admin-product-form", {
       title: "상품 등록",
       product: {},
+      formAction: "/admin/products",
+      submitLabel: "등록하기",
       coverImages: listCoverImages(),
       error: ""
     });
@@ -192,25 +211,61 @@ function createApp(options = {}) {
 
   app.post("/admin/products", requireAdmin, async (req, res, next) => {
     try {
-      const product = {
-        title: (req.body.title || "").trim(),
-        author: (req.body.author || "").trim(),
-        price: Number(req.body.price || 0),
-        summary: (req.body.summary || "").trim(),
-        tableOfContents: (req.body.tableOfContents || "").trim(),
-        hasYoutubeMembership: req.body.hasYoutubeMembership === "on",
-        coverImageUrl: (req.body.coverImageUrl || "").trim(),
-        isActive: req.body.isActive === "on"
-      };
-      if (!product.title || !product.author || !product.summary || !product.tableOfContents || product.price < 0) {
+      const product = productFromBody(req.body);
+      if (!validProduct(product)) {
         return res.status(422).render("admin-product-form", {
           title: "상품 등록",
           product,
+          formAction: "/admin/products",
+          submitLabel: "등록하기",
           coverImages: listCoverImages(),
           error: "상품명, 저자/소속, 가격, 소개, 목차를 확인해 주세요."
         });
       }
       await db.createProduct(product);
+      res.redirect("/admin");
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/admin/products/:id/edit", requireAdmin, async (req, res, next) => {
+    try {
+      const product = await db.getProduct(req.params.id, { includeInactive: true });
+      if (!product) return res.redirect("/admin");
+      res.render("admin-product-form", {
+        title: "상품 수정",
+        product: {
+          ...product,
+          tableOfContents: product.table_of_contents,
+          hasYoutubeMembership: product.has_youtube_membership,
+          coverImageUrl: product.cover_image_url,
+          isActive: product.is_active
+        },
+        formAction: `/admin/products/${product.id}`,
+        submitLabel: "수정하기",
+        coverImages: listCoverImages(),
+        error: ""
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/admin/products/:id", requireAdmin, async (req, res, next) => {
+    try {
+      const product = productFromBody(req.body);
+      if (!validProduct(product)) {
+        return res.status(422).render("admin-product-form", {
+          title: "상품 수정",
+          product,
+          formAction: `/admin/products/${req.params.id}`,
+          submitLabel: "수정하기",
+          coverImages: listCoverImages(),
+          error: "상품명, 저자/소속, 가격, 소개, 목차를 확인해 주세요."
+        });
+      }
+      await db.updateProduct(req.params.id, product);
       res.redirect("/admin");
     } catch (error) {
       next(error);

@@ -92,6 +92,33 @@ function createDatabase(databasePath = process.env.DATABASE_PATH || path.join(pr
     return getProduct(result.lastInsertRowid, { includeInactive: true });
   }
 
+  async function updateProduct(id, product) {
+    db.prepare(`
+      UPDATE products
+      SET title = @title,
+          author = @author,
+          price = @price,
+          summary = @summary,
+          table_of_contents = @tableOfContents,
+          has_youtube_membership = @hasYoutubeMembership,
+          cover_image_url = @coverImageUrl,
+          is_active = @isActive,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = @id
+    `).run({
+      id: Number(id),
+      title: product.title,
+      author: product.author,
+      price: Number(product.price),
+      summary: product.summary,
+      tableOfContents: product.tableOfContents,
+      hasYoutubeMembership: product.hasYoutubeMembership ? 1 : 0,
+      coverImageUrl: product.coverImageUrl || "",
+      isActive: product.isActive !== false ? 1 : 0
+    });
+    return getProduct(id, { includeInactive: true });
+  }
+
   async function listProducts({ page = 1, pageSize = 10, includeInactive = false } = {}) {
     const offset = (page - 1) * pageSize;
     const where = includeInactive ? "" : "WHERE is_active = 1";
@@ -230,7 +257,8 @@ function createDatabase(databasePath = process.env.DATABASE_PATH || path.join(pr
     listProducts,
     migrate,
     setDeliveryCompleted,
-    setPaymentConfirmed
+    setPaymentConfirmed,
+    updateProduct
   };
 }
 

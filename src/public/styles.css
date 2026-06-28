@@ -344,6 +344,12 @@ th {
   color: #fff;
 }
 
+.text-link {
+  color: #315fba;
+  font-weight: 800;
+  text-decoration: underline;
+}
+
 @media (max-width: 760px) {
   .site-header,
   .admin-head {
