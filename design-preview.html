@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>논준모연구소 e-book 사이트 설계 미리보기</title>
+  <style>
+    body {
+      margin: 0;
+      background: #f3f5f9;
+      color: #1f2937;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    main {
+      width: min(980px, calc(100% - 40px));
+      margin: 48px auto;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      letter-spacing: 0;
+    }
+    p {
+      margin: 0;
+      color: #5b6473;
+      line-height: 1.6;
+    }
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin: 28px 0;
+    }
+    .step {
+      min-height: 130px;
+      border: 1px solid #d8dee9;
+      border-radius: 8px;
+      background: #fff;
+      padding: 18px;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+    }
+    .step strong {
+      display: block;
+      margin-bottom: 12px;
+      color: #111827;
+      font-size: 18px;
+    }
+    .step span {
+      display: block;
+      color: #647084;
+      line-height: 1.55;
+    }
+    section {
+      border-top: 1px solid #d8dee9;
+      padding-top: 22px;
+    }
+    h2 {
+      margin: 0 0 12px;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+    ul {
+      margin: 0;
+      padding-left: 20px;
+      color: #4b5563;
+      line-height: 1.8;
+    }
+    @media (max-width: 760px) {
+      .flow {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>논준모연구소 e-book 판매 사이트 흐름</h1>
+    <p>첨부해주신 메인 화면을 기준으로, 첫 구현에서 필요한 화면과 관리자 작업을 정리했습니다.</p>
+
+    <div class="flow" aria-label="사이트 화면 흐름">
+      <div class="step">
+        <strong>메인</strong>
+        <span>e-book 10개씩 목록<br>장바구니 / 바로 주문<br>간략소개 / 목차보기</span>
+      </div>
+      <div class="step">
+        <strong>장바구니</strong>
+        <span>선택 상품 확인<br>전체 금액 계산<br>주문 페이지 이동</span>
+      </div>
+      <div class="step">
+        <strong>주문 페이지</strong>
+        <span>주문 내역 / 총액<br>계좌 안내<br>이름, 연락처, 증빙, 이메일</span>
+      </div>
+      <div class="step">
+        <strong>관리자</strong>
+        <span>상품 등록<br>입금확인<br>이메일 발송 후 발송완료</span>
+      </div>
+    </div>
+
+    <section>
+      <h2>첫 구현에서 포함할 핵심</h2>
+      <ul>
+        <li>사용자는 장바구니 주문 또는 바로 주문으로 주문 페이지에 진입합니다.</li>
+        <li>주문 페이지는 주문한 e-book 내역, 전체 금액, 입금계좌 정보와 안내 문구를 보여줍니다.</li>
+        <li>개인정보 입력 항목은 이름, 연락처, 현금영수증 또는 세금계산서 선택, e-mail로 구성합니다.</li>
+        <li>관리자는 상품을 등록하고, 주문별 입금확인 및 발송완료 상태를 관리합니다.</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

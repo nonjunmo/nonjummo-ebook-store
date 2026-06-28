@@ -1,0 +1,23 @@
+<%- include("partials/header") %>
+
+<section class="panel">
+  <h1>장바구니</h1>
+  <% if (products.length === 0) { %>
+    <p class="empty">장바구니에 담긴 e-book이 없습니다.</p>
+  <% } else { %>
+    <ul class="order-list">
+      <% products.forEach((product) => { %>
+        <li>
+          <span><%= product.title %></span>
+          <strong><%= product.price.toLocaleString("ko-KR") %>원</strong>
+        </li>
+      <% }) %>
+    </ul>
+    <div class="total">전체 금액 <strong><%= total.toLocaleString("ko-KR") %>원</strong></div>
+    <form method="post" action="/order/from-cart">
+      <button class="button primary" type="submit">주문하기</button>
+    </form>
+  <% } %>
+</section>
+
+<%- include("partials/footer") %>

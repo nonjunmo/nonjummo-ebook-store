@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.local
+npm-debug.log*
+
+.superpowers/
+.agents/
+
+*.db
+*.sqlite
+
+.DS_Store
+Thumbs.db

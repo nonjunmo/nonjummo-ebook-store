@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">
+      <span class="brand-mark">논</span>
+      <span>
+        <strong>논준모연구소</strong>
+        <small>e-book 교재</small>
+      </span>
+    </a>
+    <nav class="top-nav" aria-label="주요 메뉴">
+      <a href="/">e-book 목록 보기</a>
+      <a href="/cart">장바구니 <span><%= cartCount %></span></a>
+      <% if (isAdmin) { %>
+        <a href="/admin">관리자 페이지</a>
+      <% } else { %>
+        <a href="/admin/login">관리자 로그인</a>
+      <% } %>
+    </nav>
+  </header>
+  <main class="page">

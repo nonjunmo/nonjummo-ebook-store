@@ -1,0 +1,59 @@
+<%- include("partials/header") %>
+
+<section class="intro">
+  <h1>논준모연구소 e-book 교재</h1>
+  <p>Youtube 멤버십 영상과 함께 공부할 수 있는 e-book 교재로 연구역량과 AI 활용역량을 키워보세요.</p>
+  <p class="notice">계좌이체 입금 후 관리자의 입금확인을 통해 이메일로 e-book을 발송해 드립니다.</p>
+</section>
+
+<section class="product-list" aria-label="e-book 목록">
+  <% if (products.items.length === 0) { %>
+    <div class="empty">등록된 e-book이 없습니다.</div>
+  <% } %>
+
+  <% products.items.forEach((product) => { %>
+    <article class="product">
+      <div class="cover">
+        <% if (product.cover_image_url) { %>
+          <img src="<%= product.cover_image_url %>" alt="<%= product.title %> 표지">
+        <% } else { %>
+          <div class="cover-fallback">e-book</div>
+        <% } %>
+      </div>
+      <div class="product-body">
+        <h2><%= product.title %></h2>
+        <p><%= product.author %></p>
+        <% if (product.has_youtube_membership) { %>
+          <p class="youtube">YouTube 멤버십 영상 있음</p>
+        <% } %>
+        <details>
+          <summary>간략소개 / 목차보기</summary>
+          <p><%= product.summary %></p>
+          <pre><%= product.table_of_contents %></pre>
+        </details>
+        <strong class="price"><%= product.price.toLocaleString("ko-KR") %>원</strong>
+      </div>
+      <div class="product-actions">
+        <form method="post" action="/cart/add">
+          <input type="hidden" name="productId" value="<%= product.id %>">
+          <button class="button secondary" type="submit">장바구니</button>
+        </form>
+        <form method="post" action="/order/direct">
+          <input type="hidden" name="productId" value="<%= product.id %>">
+          <button class="button primary" type="submit">주문하기</button>
+        </form>
+      </div>
+    </article>
+  <% }) %>
+</section>
+
+<% const maxPage = Math.ceil(products.total / products.pageSize); %>
+<% if (maxPage > 1) { %>
+  <nav class="pagination" aria-label="페이지">
+    <% for (let i = 1; i <= maxPage; i += 1) { %>
+      <a class="<%= i === page ? "active" : "" %>" href="/?page=<%= i %>"><%= i %></a>
+    <% } %>
+  </nav>
+<% } %>
+
+<%- include("partials/footer") %>

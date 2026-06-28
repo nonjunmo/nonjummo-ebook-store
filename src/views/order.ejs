@@ -1,0 +1,43 @@
+<%- include("partials/header") %>
+
+<section class="order-grid">
+  <div class="panel">
+    <h1>주문 내역</h1>
+    <% if (products.length === 0) { %>
+      <p class="empty">주문할 e-book을 선택해 주세요.</p>
+    <% } else { %>
+      <ul class="order-list">
+        <% products.forEach((product) => { %>
+          <li>
+            <span><%= product.title %></span>
+            <strong><%= product.price.toLocaleString("ko-KR") %>원</strong>
+          </li>
+        <% }) %>
+      </ul>
+      <div class="total">전체 금액 <strong><%= total.toLocaleString("ko-KR") %>원</strong></div>
+    <% } %>
+    <div class="bank">
+      <h2>입금계좌</h2>
+      <p><%= bankAccount %></p>
+      <small>입금 확인 후 관리자가 주문 e-mail로 e-book을 발송합니다.</small>
+    </div>
+  </div>
+
+  <form class="panel form" method="post" action="/order">
+    <h1>개인정보 입력</h1>
+    <% if (error) { %><p class="error"><%= error %></p><% } %>
+    <label>이름<input name="customerName" value="<%= form.customerName || "" %>" required></label>
+    <label>연락처<input name="phone" value="<%= form.phone || "" %>" required></label>
+    <label>증빙 선택
+      <select name="receiptType" required>
+        <option value="">선택</option>
+        <option value="cash_receipt" <%= form.receiptType === "cash_receipt" ? "selected" : "" %>>현금영수증</option>
+        <option value="tax_invoice" <%= form.receiptType === "tax_invoice" ? "selected" : "" %>>세금계산서</option>
+      </select>
+    </label>
+    <label>e-mail<input type="email" name="email" value="<%= form.email || "" %>" required></label>
+    <button class="button primary" type="submit">주문 제출</button>
+  </form>
+</section>
+
+<%- include("partials/footer") %>

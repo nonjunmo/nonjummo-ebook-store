@@ -1,0 +1,17 @@
+<%- include("partials/header") %>
+
+<form class="panel form" method="post" action="/admin/products">
+  <h1>상품 등록</h1>
+  <% if (error) { %><p class="error"><%= error %></p><% } %>
+  <label>상품명<input name="title" value="<%= product.title || "" %>" required></label>
+  <label>저자/소속<input name="author" value="<%= product.author || "" %>" required></label>
+  <label>가격<input type="number" name="price" min="0" step="1000" value="<%= product.price || "" %>" required></label>
+  <label>표지 이미지 URL<input name="coverImageUrl" value="<%= product.coverImageUrl || "" %>"></label>
+  <label>간략소개<textarea name="summary" rows="4" required><%= product.summary || "" %></textarea></label>
+  <label>목차<textarea name="tableOfContents" rows="6" required><%= product.tableOfContents || "" %></textarea></label>
+  <label class="check"><input type="checkbox" name="hasYoutubeMembership" <%= product.hasYoutubeMembership ? "checked" : "" %>> YouTube 멤버십 영상 있음</label>
+  <label class="check"><input type="checkbox" name="isActive" <%= product.isActive === false ? "" : "checked" %>> 판매중</label>
+  <button class="button primary" type="submit">등록하기</button>
+</form>
+
+<%- include("partials/footer") %>
