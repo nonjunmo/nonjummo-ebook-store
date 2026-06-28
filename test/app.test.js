@@ -78,6 +78,19 @@ test("admin can log in and create a product", async () => {
   close();
 });
 
+test("admin product form shows bundled cover image paths", async () => {
+  const { app, close } = await buildTestApp();
+  const agent = request.agent(app);
+
+  await agent.post("/admin/login").type("form").send({ password: "secret" }).expect(302);
+  const response = await agent.get("/admin/products/new");
+
+  assert.equal(response.status, 200);
+  assert.match(response.text, /\/img\/book-01\.jpg/);
+  assert.match(response.text, /\/img\/book-RAE\.jpg/);
+  close();
+});
+
 test("customer can order directly and sees bank account on order page", async () => {
   const { app, db, close } = await buildTestApp();
   const product = await db.createProduct({

@@ -6,7 +6,21 @@
   <label>상품명<input name="title" value="<%= product.title || "" %>" required></label>
   <label>저자/소속<input name="author" value="<%= product.author || "" %>" required></label>
   <label>가격<input type="number" name="price" min="0" step="1000" value="<%= product.price || "" %>" required></label>
-  <label>표지 이미지 URL<input name="coverImageUrl" value="<%= product.coverImageUrl || "" %>"></label>
+  <label>표지 이미지 URL
+    <input name="coverImageUrl" list="cover-image-options" value="<%= product.coverImageUrl || "" %>" placeholder="/img/book-01.jpg">
+  </label>
+  <% if (coverImages && coverImages.length > 0) { %>
+    <datalist id="cover-image-options">
+      <% coverImages.forEach((imagePath) => { %>
+        <option value="<%= imagePath %>"></option>
+      <% }) %>
+    </datalist>
+    <div class="image-paths" aria-label="사용 가능한 표지 이미지 경로">
+      <% coverImages.forEach((imagePath) => { %>
+        <code><%= imagePath %></code>
+      <% }) %>
+    </div>
+  <% } %>
   <label>간략소개<textarea name="summary" rows="4" required><%= product.summary || "" %></textarea></label>
   <label>목차<textarea name="tableOfContents" rows="6" required><%= product.tableOfContents || "" %></textarea></label>
   <label class="check"><input type="checkbox" name="hasYoutubeMembership" <%= product.hasYoutubeMembership ? "checked" : "" %>> YouTube 멤버십 영상 있음</label>

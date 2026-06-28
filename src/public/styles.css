@@ -272,6 +272,22 @@ textarea {
   font-weight: 700;
 }
 
+.image-paths {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: -6px;
+}
+
+.image-paths code {
+  border: 1px solid #d8dee9;
+  border-radius: 5px;
+  background: #f8fafc;
+  padding: 6px 8px;
+  color: #475569;
+  font-size: 13px;
+}
+
 .admin-head {
   display: flex;
   justify-content: space-between;

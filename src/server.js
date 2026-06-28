@@ -2,6 +2,7 @@ const path = require("node:path");
 const express = require("express");
 const session = require("express-session");
 const { createDatabase } = require("./db");
+const fs = require("node:fs");
 
 function ensureCart(req) {
   if (!Array.isArray(req.session.cart)) req.session.cart = [];
@@ -19,6 +20,15 @@ function requireAdmin(req, res, next) {
 
 function receiptLabel(type) {
   return type === "tax_invoice" ? "세금계산서" : "현금영수증";
+}
+
+function listCoverImages() {
+  const imgDir = path.join(__dirname, "public", "img");
+  if (!fs.existsSync(imgDir)) return [];
+  return fs.readdirSync(imgDir)
+    .filter((file) => /\.(jpe?g|png|webp|gif)$/i.test(file))
+    .sort((a, b) => a.localeCompare(b))
+    .map((file) => `/img/${file}`);
 }
 
 function createApp(options = {}) {
@@ -175,6 +185,7 @@ function createApp(options = {}) {
     res.render("admin-product-form", {
       title: "상품 등록",
       product: {},
+      coverImages: listCoverImages(),
       error: ""
     });
   });
@@ -195,6 +206,7 @@ function createApp(options = {}) {
         return res.status(422).render("admin-product-form", {
           title: "상품 등록",
           product,
+          coverImages: listCoverImages(),
           error: "상품명, 저자/소속, 가격, 소개, 목차를 확인해 주세요."
         });
       }
