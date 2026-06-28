@@ -6,13 +6,34 @@
   <p class="notice">계좌이체 입금 후 관리자의 입금확인을 통해 이메일로 e-book을 발송해 드립니다.</p>
 </section>
 
+<% function bulkControls(position) { %>
+  <div class="bulk-controls bulk-controls-<%= position %>">
+    <label class="check bulk-check">
+      <input type="checkbox" data-select-all-products>
+      전체 선택
+    </label>
+    <div class="bulk-actions">
+      <button class="button secondary" type="submit" form="bulk-products-form" formaction="/cart/add-selected">선택 상품 장바구니</button>
+      <button class="button primary" type="submit" form="bulk-products-form" formaction="/order/selected">선택 상품 주문하기</button>
+    </div>
+  </div>
+<% } %>
+
 <section class="product-list" aria-label="e-book 목록">
   <% if (products.items.length === 0) { %>
     <div class="empty">등록된 e-book이 없습니다.</div>
   <% } %>
 
+  <% if (products.items.length > 0) { %>
+    <form id="bulk-products-form" method="post"></form>
+    <%- bulkControls("top") %>
+  <% } %>
+
   <% products.items.forEach((product) => { %>
     <article class="product">
+      <label class="product-select" aria-label="<%= product.title %> 선택">
+        <input type="checkbox" form="bulk-products-form" name="productIds" value="<%= product.id %>" data-product-checkbox>
+      </label>
       <div class="cover">
         <% if (product.cover_image_url) { %>
           <img src="<%= product.cover_image_url %>" alt="<%= product.title %> 표지">
@@ -45,6 +66,10 @@
       </div>
     </article>
   <% }) %>
+
+  <% if (products.items.length > 0) { %>
+    <%- bulkControls("bottom") %>
+  <% } %>
 </section>
 
 <% const maxPage = Math.ceil(products.total / products.pageSize); %>
@@ -55,5 +80,18 @@
     <% } %>
   </nav>
 <% } %>
+
+<script>
+  document.querySelectorAll("[data-select-all-products]").forEach((selectAll) => {
+    selectAll.addEventListener("change", () => {
+      document.querySelectorAll("[data-product-checkbox]").forEach((checkbox) => {
+        checkbox.checked = selectAll.checked;
+      });
+      document.querySelectorAll("[data-select-all-products]").forEach((other) => {
+        other.checked = selectAll.checked;
+      });
+    });
+  });
+</script>
 
 <%- include("partials/footer") %>

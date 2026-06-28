@@ -92,11 +92,22 @@ h2 {
 
 .product {
   display: grid;
-  grid-template-columns: 124px 1fr 142px;
+  grid-template-columns: 34px 124px 1fr 142px;
   gap: 26px;
   align-items: center;
   padding: 36px 0;
   border-bottom: 1px solid #d5dbe5;
+}
+
+.product-select {
+  display: grid;
+  place-items: center;
+}
+
+.product-select input,
+.bulk-check input {
+  width: 18px;
+  height: 18px;
 }
 
 .cover {
@@ -155,6 +166,31 @@ pre {
 
 .product-actions {
   display: grid;
+  gap: 10px;
+}
+
+.bulk-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid #d8dee9;
+  border-radius: 8px;
+  background: #fff;
+  padding: 14px 16px;
+}
+
+.bulk-controls-top {
+  margin-bottom: 8px;
+}
+
+.bulk-controls-bottom {
+  margin-top: 18px;
+}
+
+.bulk-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(150px, 1fr));
   gap: 10px;
 }
 
@@ -404,6 +440,15 @@ th {
 
   .product,
   .order-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bulk-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .bulk-actions {
     grid-template-columns: 1fr;
   }
 

@@ -13,6 +13,12 @@ function uniqueCart(ids) {
   return [...new Set(ids.map((id) => Number(id)).filter(Boolean))];
 }
 
+function selectedProductIds(body) {
+  const value = body.productIds;
+  if (Array.isArray(value)) return uniqueCart(value);
+  return uniqueCart(value ? [value] : []);
+}
+
 function requireAdmin(req, res, next) {
   if (req.session.isAdmin) return next();
   return res.redirect("/admin/login");
@@ -166,6 +172,13 @@ function createApp(options = {}) {
     res.redirect("/cart");
   });
 
+  app.post("/cart/add-selected", (req, res) => {
+    const productIds = selectedProductIds(req.body);
+    if (productIds.length === 0) return res.redirect("/");
+    req.session.cart = uniqueCart([...ensureCart(req), ...productIds]);
+    return res.redirect("/cart");
+  });
+
   app.post("/cart/remove", (req, res) => {
     const productId = Number(req.body.productId);
     req.session.cart = ensureCart(req).filter((id) => Number(id) !== productId);
@@ -188,6 +201,13 @@ function createApp(options = {}) {
   app.post("/order/direct", (req, res) => {
     req.session.orderProductIds = uniqueCart([req.body.productId]);
     res.redirect("/order");
+  });
+
+  app.post("/order/selected", (req, res) => {
+    const productIds = selectedProductIds(req.body);
+    if (productIds.length === 0) return res.redirect("/");
+    req.session.orderProductIds = productIds;
+    return res.redirect("/order");
   });
 
   app.post("/order/from-cart", (req, res) => {

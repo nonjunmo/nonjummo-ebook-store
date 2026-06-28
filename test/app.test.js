@@ -212,6 +212,67 @@ test("customer can remove a product from the cart", async () => {
   close();
 });
 
+test("customer can add selected products to cart and order selected products", async () => {
+  const { app, db, close } = await buildTestApp();
+  const first = await db.createProduct({
+    title: "Bulk First Product",
+    author: "Nonjummo",
+    price: 13000,
+    summary: "summary",
+    tableOfContents: "toc",
+    hasYoutubeMembership: false,
+    coverImageUrl: "",
+    isActive: true
+  });
+  const second = await db.createProduct({
+    title: "Bulk Second Product",
+    author: "Nonjummo",
+    price: 17000,
+    summary: "summary",
+    tableOfContents: "toc",
+    hasYoutubeMembership: false,
+    coverImageUrl: "",
+    isActive: true
+  });
+  const third = await db.createProduct({
+    title: "Bulk Third Product",
+    author: "Nonjummo",
+    price: 19000,
+    summary: "summary",
+    tableOfContents: "toc",
+    hasYoutubeMembership: false,
+    coverImageUrl: "",
+    isActive: true
+  });
+  const agent = request.agent(app);
+
+  const home = await agent.get("/");
+  assert.match(home.text, /전체 선택/);
+  assert.match(home.text, /선택 상품 장바구니/);
+  assert.match(home.text, /선택 상품 주문하기/);
+
+  await agent
+    .post("/cart/add-selected")
+    .type("form")
+    .send({ productIds: [first.id, second.id] })
+    .expect(302);
+  const cart = await agent.get("/cart");
+  assert.match(cart.text, /Bulk First Product/);
+  assert.match(cart.text, /Bulk Second Product/);
+  assert.doesNotMatch(cart.text, /Bulk Third Product/);
+
+  await agent
+    .post("/order/selected")
+    .type("form")
+    .send({ productIds: [second.id, third.id] })
+    .expect(302);
+  const order = await agent.get("/order");
+  assert.doesNotMatch(order.text, /Bulk First Product/);
+  assert.match(order.text, /Bulk Second Product/);
+  assert.match(order.text, /Bulk Third Product/);
+  close();
+});
+
 test("admin can mark payment and delivery complete", async () => {
   const { app, db, close } = await buildTestApp();
   const product = await db.createProduct({
