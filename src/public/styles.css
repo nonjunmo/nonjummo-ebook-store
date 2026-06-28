@@ -64,6 +64,15 @@ a {
   font-weight: 700;
 }
 
+.top-nav .admin-login-link {
+  color: #fff;
+}
+
+.top-nav .admin-login-link:focus-visible {
+  outline: 2px solid #cfd6e3;
+  outline-offset: 4px;
+}
+
 .page {
   width: min(980px, calc(100% - 36px));
   margin: 34px auto 70px;

@@ -48,6 +48,7 @@ test("home page shows seeded products and paging copy", async () => {
   assert.match(response.text, /Book 1\. 논문의 논리구조/);
   assert.match(response.text, /장바구니/);
   assert.match(response.text, /주문하기/);
+  assert.match(response.text, /class="admin-login-link"/);
   close();
 });
 
