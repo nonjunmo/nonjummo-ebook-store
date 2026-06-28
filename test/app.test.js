@@ -242,3 +242,107 @@ test("admin can mark payment and delivery complete", async () => {
   assert.equal(orders[0].delivery_completed, true);
   close();
 });
+
+test("admin dashboard shows only undelivered orders and completed orders are paged", async () => {
+  const { app, db, close } = await buildTestApp();
+  const product = await db.createProduct({
+    title: "Paging Product",
+    author: "Nonjummo",
+    price: 1000,
+    summary: "summary",
+    tableOfContents: "toc",
+    hasYoutubeMembership: false,
+    coverImageUrl: "",
+    isActive: true
+  });
+
+  const pending = await db.createOrder({
+    customerName: "Pending Customer",
+    phone: "010",
+    receiptType: "cash_receipt",
+    email: "pending@example.com",
+    productIds: [product.id]
+  });
+  for (let index = 1; index <= 12; index += 1) {
+    const order = await db.createOrder({
+      customerName: `Done Customer ${String(index).padStart(2, "0")}`,
+      phone: `010-${index}`,
+      receiptType: "cash_receipt",
+      email: `done${index}@example.com`,
+      productIds: [product.id]
+    });
+    await db.setDeliveryCompleted(order.id, true);
+  }
+  const agent = request.agent(app);
+  await agent.post("/admin/login").type("form").send({ password: "secret" }).expect(302);
+
+  const dashboard = await agent.get("/admin");
+  assert.match(dashboard.text, /Pending Customer/);
+  assert.doesNotMatch(dashboard.text, /Done Customer 01/);
+  assert.match(dashboard.text, /발송완료된 주문자/);
+
+  const firstPage = await agent.get("/admin/orders/completed");
+  assert.equal(firstPage.status, 200);
+  assert.match(firstPage.text, /Done Customer 12/);
+  assert.match(firstPage.text, /Done Customer 03/);
+  assert.doesNotMatch(firstPage.text, /Done Customer 02/);
+
+  const secondPage = await agent.get("/admin/orders/completed?page=2");
+  assert.match(secondPage.text, /Done Customer 02/);
+  assert.match(secondPage.text, /Done Customer 01/);
+  assert.doesNotMatch(secondPage.text, /Pending Customer/);
+
+  const refreshedPending = await db.listOrders({ deliveryCompleted: false });
+  assert.equal(refreshedPending.length, 1);
+  assert.equal(refreshedPending[0].id, pending.id);
+  close();
+});
+
+test("admin can export all completed orders as CSV and HTML", async () => {
+  const { app, db, close } = await buildTestApp();
+  const product = await db.createProduct({
+    title: "Export Product",
+    author: "Nonjummo",
+    price: 9000,
+    summary: "summary",
+    tableOfContents: "toc",
+    hasYoutubeMembership: false,
+    coverImageUrl: "",
+    isActive: true
+  });
+  const completed = await db.createOrder({
+    customerName: "Export Customer",
+    phone: "010-export",
+    receiptType: "tax_invoice",
+    email: "export@example.com",
+    productIds: [product.id]
+  });
+  const pending = await db.createOrder({
+    customerName: "Not Exported",
+    phone: "010-pending",
+    receiptType: "cash_receipt",
+    email: "pending@example.com",
+    productIds: [product.id]
+  });
+  await db.setDeliveryCompleted(completed.id, true);
+  const agent = request.agent(app);
+  await agent.post("/admin/login").type("form").send({ password: "secret" }).expect(302);
+
+  const csv = await agent.get("/admin/orders/completed/export.csv");
+  assert.equal(csv.status, 200);
+  assert.match(csv.headers["content-type"], /text\/csv/);
+  assert.match(csv.text, /Export Customer/);
+  assert.match(csv.text, /Export Product/);
+  assert.doesNotMatch(csv.text, /Not Exported/);
+
+  const html = await agent.get("/admin/orders/completed/export.html");
+  assert.equal(html.status, 200);
+  assert.match(html.headers["content-type"], /text\/html/);
+  assert.match(html.text, /Export Customer/);
+  assert.match(html.text, /Export Product/);
+  assert.doesNotMatch(html.text, /Not Exported/);
+
+  const stillPending = await db.listOrders({ deliveryCompleted: false });
+  assert.equal(stillPending[0].id, pending.id);
+  close();
+});

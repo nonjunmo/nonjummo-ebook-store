@@ -4,6 +4,7 @@
   <h1>관리자 페이지</h1>
   <div class="admin-actions">
     <a class="button primary link-button" href="/admin/products/new">상품 등록</a>
+    <a class="button secondary link-button" href="/admin/orders/completed">발송완료된 주문자</a>
     <form method="post" action="/admin/logout">
       <button class="button secondary" type="submit">로그아웃</button>
     </form>
@@ -12,6 +13,7 @@
 
 <section class="panel">
   <h2>주문 관리</h2>
+  <p class="section-note">발송완료에 체크되지 않은 주문만 표시됩니다.</p>
   <% if (orders.length === 0) { %>
     <p class="empty">접수된 주문이 없습니다.</p>
   <% } else { %>

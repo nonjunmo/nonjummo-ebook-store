@@ -205,12 +205,13 @@ function createDatabase(databasePath = process.env.DATABASE_PATH || path.join(pr
     });
   }
 
-  async function listOrders() {
-    const orders = db.prepare(`
-      SELECT *
-      FROM orders
-      ORDER BY created_at DESC, id DESC
-    `).all();
+  function orderWhereClause({ deliveryCompleted } = {}) {
+    if (deliveryCompleted === true) return "WHERE delivery_completed = 1";
+    if (deliveryCompleted === false) return "WHERE delivery_completed = 0";
+    return "";
+  }
+
+  function attachOrderItems(orders) {
     const items = db.prepare(`
       SELECT *
       FROM order_items
@@ -223,6 +224,36 @@ function createDatabase(databasePath = process.env.DATABASE_PATH || path.join(pr
       itemsByOrder.set(item.order_id, list);
     }
     return orders.map((row) => normalizeOrder({ ...row, items: itemsByOrder.get(row.id) || [] }));
+  }
+
+  async function listOrders(options = {}) {
+    const where = orderWhereClause(options);
+    const orders = db.prepare(`
+      SELECT *
+      FROM orders
+      ${where}
+      ORDER BY created_at DESC, id DESC
+    `).all();
+    return attachOrderItems(orders);
+  }
+
+  async function listOrdersPage({ deliveryCompleted, page = 1, pageSize = 10 } = {}) {
+    const where = orderWhereClause({ deliveryCompleted });
+    const offset = (page - 1) * pageSize;
+    const total = db.prepare(`SELECT COUNT(*) AS count FROM orders ${where}`).get().count;
+    const orders = db.prepare(`
+      SELECT *
+      FROM orders
+      ${where}
+      ORDER BY created_at DESC, id DESC
+      LIMIT ? OFFSET ?
+    `).all(pageSize, offset);
+    return {
+      items: attachOrderItems(orders),
+      total: Number(total),
+      page,
+      pageSize
+    };
   }
 
   async function setPaymentConfirmed(id, confirmed) {
@@ -254,6 +285,7 @@ function createDatabase(databasePath = process.env.DATABASE_PATH || path.join(pr
     getProduct,
     getProductsByIds,
     listOrders,
+    listOrdersPage,
     listProducts,
     migrate,
     setDeliveryCompleted,

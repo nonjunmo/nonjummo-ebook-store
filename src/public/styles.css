@@ -301,6 +301,11 @@ textarea {
   font-weight: 700;
 }
 
+.section-note {
+  margin: 0 0 14px;
+  color: #647084;
+}
+
 .image-paths {
   display: flex;
   flex-wrap: wrap;

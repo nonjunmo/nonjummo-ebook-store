@@ -48,6 +48,82 @@ function validProduct(product) {
   return product.title && product.author && product.summary && product.tableOfContents && product.price >= 0;
 }
 
+function orderItemTitles(order) {
+  return order.items.map((item) => item.product_title).join(" / ");
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+function escapeCsv(value) {
+  const text = String(value ?? "");
+  return `"${text.replaceAll('"', '""')}"`;
+}
+
+function ordersToCsv(orders) {
+  const rows = [
+    ["주문자", "주문 e-book", "금액", "증빙", "연락처", "e-mail", "입금확인", "발송완료", "주문일"]
+  ];
+  for (const order of orders) {
+    rows.push([
+      order.customer_name,
+      orderItemTitles(order),
+      order.total_amount,
+      receiptLabel(order.receipt_type),
+      order.phone,
+      order.email,
+      order.payment_confirmed ? "확인" : "미확인",
+      order.delivery_completed ? "발송완료" : "미발송",
+      order.created_at
+    ]);
+  }
+  return "\uFEFF" + rows.map((row) => row.map(escapeCsv).join(",")).join("\r\n");
+}
+
+function ordersToHtml(orders) {
+  const rows = orders.map((order) => `
+    <tr>
+      <td>${escapeHtml(order.customer_name)}</td>
+      <td>${escapeHtml(orderItemTitles(order))}</td>
+      <td>${escapeHtml(order.total_amount.toLocaleString("ko-KR"))}원</td>
+      <td>${escapeHtml(receiptLabel(order.receipt_type))}</td>
+      <td>${escapeHtml(order.phone)}</td>
+      <td>${escapeHtml(order.email)}</td>
+      <td>${escapeHtml(order.payment_confirmed ? "확인" : "미확인")}</td>
+      <td>${escapeHtml(order.created_at)}</td>
+    </tr>
+  `).join("");
+  return `<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>발송완료된 주문자</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 24px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #d8dee9; padding: 8px; text-align: left; vertical-align: top; }
+  </style>
+</head>
+<body>
+  <h1>발송완료된 주문자</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>주문자</th><th>주문 e-book</th><th>금액</th><th>증빙</th>
+        <th>연락처</th><th>e-mail</th><th>입금확인</th><th>주문일</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+</body>
+</html>`;
+}
+
 function createApp(options = {}) {
   const app = express();
   const db = options.db;
@@ -200,8 +276,45 @@ function createApp(options = {}) {
   app.get("/admin", requireAdmin, async (req, res, next) => {
     try {
       const products = await db.listProducts({ page: 1, pageSize: 100, includeInactive: true });
-      const orders = await db.listOrders();
+      const orders = await db.listOrders({ deliveryCompleted: false });
       res.render("admin-dashboard", { title: "관리자 페이지", products: products.items, orders });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/admin/orders/completed", requireAdmin, async (req, res, next) => {
+    try {
+      const page = Math.max(Number(req.query.page || 1), 1);
+      const orders = await db.listOrdersPage({ deliveryCompleted: true, page, pageSize: 10 });
+      res.render("admin-completed-orders", {
+        title: "발송완료된 주문자",
+        orders,
+        page,
+        maxPage: Math.max(Math.ceil(orders.total / orders.pageSize), 1)
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/admin/orders/completed/export.csv", requireAdmin, async (req, res, next) => {
+    try {
+      const orders = await db.listOrders({ deliveryCompleted: true });
+      res.setHeader("Content-Type", "text/csv; charset=utf-8");
+      res.setHeader("Content-Disposition", 'attachment; filename="completed-orders.csv"');
+      res.send(ordersToCsv(orders));
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/admin/orders/completed/export.html", requireAdmin, async (req, res, next) => {
+    try {
+      const orders = await db.listOrders({ deliveryCompleted: true });
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.setHeader("Content-Disposition", 'attachment; filename="completed-orders.html"');
+      res.send(ordersToHtml(orders));
     } catch (error) {
       next(error);
     }
