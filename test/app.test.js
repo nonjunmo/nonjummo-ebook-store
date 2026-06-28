@@ -1,16 +1,16 @@
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
 const test = require("node:test");
 const request = require("supertest");
-const { newDb } = require("pg-mem");
 
 const { createDatabase } = require("../src/db");
 const { createApp } = require("../src/server");
 
 async function buildTestApp() {
-  const memory = newDb();
-  const pg = memory.adapters.createPg();
-  const pool = new pg.Pool();
-  const db = createDatabase({ pool });
+  const databasePath = path.join(os.tmpdir(), `nonjummo-ebook-test-${Date.now()}-${Math.random()}.db`);
+  const db = createDatabase(databasePath);
   await db.migrate();
   const app = createApp({
     db,
@@ -18,11 +18,18 @@ async function buildTestApp() {
     bankAccount: "국민은행 123-456 논준모연구소",
     sessionSecret: "test-session-secret"
   });
-  return { app, db, pool };
+  return {
+    app,
+    db,
+    close() {
+      db.close();
+      fs.rmSync(databasePath, { force: true });
+    }
+  };
 }
 
 test("home page shows seeded products and paging copy", async () => {
-  const { app, db, pool } = await buildTestApp();
+  const { app, db, close } = await buildTestApp();
   await db.createProduct({
     title: "Book 1. 논문의 논리구조",
     author: "논준모연구소 (김성하 소장)",
@@ -41,11 +48,11 @@ test("home page shows seeded products and paging copy", async () => {
   assert.match(response.text, /Book 1\. 논문의 논리구조/);
   assert.match(response.text, /장바구니/);
   assert.match(response.text, /주문하기/);
-  await pool.end();
+  close();
 });
 
 test("admin can log in and create a product", async () => {
-  const { app, db, pool } = await buildTestApp();
+  const { app, db, close } = await buildTestApp();
   const agent = request.agent(app);
 
   await agent.post("/admin/login").type("form").send({ password: "secret" }).expect(302);
@@ -68,11 +75,11 @@ test("admin can log in and create a product", async () => {
   assert.equal(products.items.length, 1);
   assert.equal(products.items[0].title, "AI 이후의 미래");
   assert.equal(products.items[0].price, 30000);
-  await pool.end();
+  close();
 });
 
 test("customer can order directly and sees bank account on order page", async () => {
-  const { app, db, pool } = await buildTestApp();
+  const { app, db, close } = await buildTestApp();
   const product = await db.createProduct({
     title: "직접 주문 교재",
     author: "논준모연구소",
@@ -108,11 +115,11 @@ test("customer can order directly and sees bank account on order page", async ()
   assert.equal(orders[0].customer_name, "홍길동");
   assert.equal(orders[0].total_amount, 25000);
   assert.equal(orders[0].items.length, 1);
-  await pool.end();
+  close();
 });
 
 test("admin can mark payment and delivery complete", async () => {
-  const { app, db, pool } = await buildTestApp();
+  const { app, db, close } = await buildTestApp();
   const product = await db.createProduct({
     title: "관리자 상태 교재",
     author: "논준모연구소",
@@ -139,5 +146,5 @@ test("admin can mark payment and delivery complete", async () => {
   const orders = await db.listOrders();
   assert.equal(orders[0].payment_confirmed, true);
   assert.equal(orders[0].delivery_completed, true);
-  await pool.end();
+  close();
 });

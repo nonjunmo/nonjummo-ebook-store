@@ -2,11 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a Render-ready e-book sales site for 논준모연구소 with PostgreSQL-backed products, orders, and admin status management.
+**Goal:** Build a Render-ready e-book sales site for 논준모연구소 with SQLite-backed products, orders, and admin status management.
 
-**Architecture:** Express renders EJS pages for public shopping, ordering, and admin management. A small PostgreSQL data layer owns schema creation and queries. Tests use `pg-mem` through the same query layer so behavior is verified without a live external database.
+**Architecture:** Express renders EJS pages for public shopping, ordering, and admin management. A small SQLite data layer owns schema creation and queries. Tests use temporary SQLite files through the same query layer.
 
-**Tech Stack:** Node.js, Express, EJS, express-session, pg, pg-mem, node:test, supertest.
+**Tech Stack:** Node.js, Express, EJS, express-session, better-sqlite3, node:test, supertest.
 
 ---
 
@@ -14,7 +14,7 @@
 
 - `package.json`: npm scripts and dependencies.
 - `.env.example`: Render/local environment variable template.
-- `src/db.js`: PostgreSQL pool creation, schema migration, and query functions.
+- `src/db.js`: SQLite database creation, schema migration, and query functions.
 - `src/server.js`: Express app factory, routes, sessions, and form handling.
 - `src/views/*.ejs`: Public and admin server-rendered screens.
 - `src/public/styles.css`: Responsive styling based on the supplied mockup.
@@ -29,7 +29,7 @@
 - [ ] Create `test/app.test.js` that imports `createApp` and `createDatabase`, then verifies the home page, admin product creation, direct order creation, and order status updates.
 - [ ] Run `npm test` and confirm it fails because `src/server.js` and `src/db.js` do not exist.
 
-### Task 2: PostgreSQL Data Layer
+### Task 2: SQLite Data Layer
 
 - [ ] Create `src/db.js` with `createDatabase`, `migrate`, product CRUD, cart product lookup, order creation, order listing, and order status updates.
 - [ ] Use parameterized SQL for every input.
@@ -57,4 +57,4 @@
 
 ## Self-Review
 
-The plan covers public listing, 10-item paging, cart/direct order flows, order form fields, bank account copy, PostgreSQL persistence, admin product registration, payment confirmation, and delivery completion. The plan intentionally excludes automatic email sending in the first version, matching the approved design.
+The plan covers public listing, 10-item paging, cart/direct order flows, order form fields, bank account copy, SQLite persistence, admin product registration, payment confirmation, and delivery completion. The plan intentionally excludes automatic email sending in the first version, matching the approved design.

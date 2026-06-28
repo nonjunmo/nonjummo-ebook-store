@@ -6,7 +6,7 @@
 
 ## 기술 방향
 
-Render Web Service와 PostgreSQL을 기준으로 구현한다. 서버는 Node.js, Express, EJS를 사용해 서버 렌더링 방식으로 구성한다. PostgreSQL 연결은 `DATABASE_URL` 환경변수를 사용하며, 로컬 개발과 테스트에서는 별도 데이터베이스 URL을 주입할 수 있게 한다.
+Render Web Service와 SQLite를 기준으로 구현한다. 서버는 Node.js, Express, EJS를 사용해 서버 렌더링 방식으로 구성한다. SQLite 파일 경로는 `DATABASE_PATH` 환경변수를 사용하며, Render 운영 환경에서는 Persistent Disk의 `/var/data/app.db`를 사용한다.
 
 ## 화면
 
