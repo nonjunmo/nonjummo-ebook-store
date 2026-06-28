@@ -30,39 +30,18 @@
   <% } %>
 
   <% products.items.forEach((product) => { %>
-    <article class="product">
-      <label class="product-select" aria-label="<%= product.title %> 선택">
-        <input type="checkbox" form="bulk-products-form" name="productIds" value="<%= product.id %>" data-product-checkbox>
-      </label>
-      <div class="cover">
-        <% if (product.cover_image_url) { %>
-          <img src="<%= product.cover_image_url %>" alt="<%= product.title %> 표지">
-        <% } else { %>
-          <div class="cover-fallback">e-book</div>
-        <% } %>
-      </div>
-      <div class="product-body">
-        <h2><%= product.title %></h2>
-        <p><%= product.author %></p>
-        <% if (product.has_youtube_membership) { %>
-          <p class="youtube">YouTube 멤버십 영상 있음</p>
-        <% } %>
-        <details>
-          <summary>간략소개 / 목차보기</summary>
-          <p><%= product.summary %></p>
-          <pre><%= product.table_of_contents %></pre>
-        </details>
+    <article class="product product-compact">
+      <div class="product-summary">
+        <label class="product-select" aria-label="<%= product.title %> 선택">
+          <input type="checkbox" form="bulk-products-form" name="productIds" value="<%= product.id %>" data-product-checkbox>
+        </label>
+        <div class="product-body">
+          <h2><a class="product-title-link" href="/products/<%= product.id %>"><%= product.title %></a></h2>
+        </div>
         <strong class="price"><%= product.price.toLocaleString("ko-KR") %>원</strong>
       </div>
       <div class="product-actions">
-        <form method="post" action="/cart/add">
-          <input type="hidden" name="productId" value="<%= product.id %>">
-          <button class="button secondary" type="submit">장바구니</button>
-        </form>
-        <form method="post" action="/order/direct">
-          <input type="hidden" name="productId" value="<%= product.id %>">
-          <button class="button primary" type="submit">주문하기</button>
-        </form>
+        <a class="button detail-button" href="/products/<%= product.id %>">상세보기</a>
       </div>
     </article>
   <% }) %>

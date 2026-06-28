@@ -166,6 +166,19 @@ function createApp(options = {}) {
     }
   });
 
+  app.get("/products/:id", async (req, res, next) => {
+    try {
+      const product = await db.getProduct(req.params.id);
+      if (!product) return res.redirect("/");
+      return res.render("product-detail", {
+        title: product.title,
+        product
+      });
+    } catch (error) {
+      return next(error);
+    }
+  });
+
   app.post("/cart/add", async (req, res) => {
     const cart = ensureCart(req);
     req.session.cart = uniqueCart([...cart, req.body.productId]);

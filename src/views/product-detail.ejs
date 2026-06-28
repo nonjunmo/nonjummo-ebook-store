@@ -1,0 +1,48 @@
+<%- include("partials/header") %>
+
+<nav class="back-nav" aria-label="이전 화면">
+  <a class="text-link" href="/">e-book 목록 보기</a>
+</nav>
+
+<article class="product-detail">
+  <div class="detail-cover cover">
+    <% if (product.cover_image_url) { %>
+      <img src="<%= product.cover_image_url %>" alt="<%= product.title %> 표지">
+    <% } else { %>
+      <div class="cover-fallback">e-book</div>
+    <% } %>
+  </div>
+
+  <div class="detail-body">
+    <h1><%= product.title %></h1>
+    <p class="detail-author"><%= product.author %></p>
+    <strong class="detail-price"><%= product.price.toLocaleString("ko-KR") %>원</strong>
+
+    <% if (product.has_youtube_membership) { %>
+      <p class="youtube">YouTube 멤버십 영상 있음</p>
+    <% } %>
+
+    <section class="detail-section">
+      <h2>간략소개</h2>
+      <p><%= product.summary %></p>
+    </section>
+
+    <section class="detail-section">
+      <h2>목차</h2>
+      <pre><%= product.table_of_contents %></pre>
+    </section>
+
+    <div class="detail-actions">
+      <form method="post" action="/cart/add">
+        <input type="hidden" name="productId" value="<%= product.id %>">
+        <button class="button secondary" type="submit">장바구니</button>
+      </form>
+      <form method="post" action="/order/direct">
+        <input type="hidden" name="productId" value="<%= product.id %>">
+        <button class="button primary" type="submit">주문하기</button>
+      </form>
+    </div>
+  </div>
+</article>
+
+<%- include("partials/footer") %>

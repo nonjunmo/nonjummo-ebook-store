@@ -52,6 +52,71 @@ test("home page shows seeded products and paging copy", async () => {
   close();
 });
 
+test("home page shows only compact product information and no per-item purchase buttons", async () => {
+  const { app, db, close } = await buildTestApp();
+  const product = await db.createProduct({
+    title: "Compact Product",
+    author: "Hidden Author",
+    price: 42000,
+    summary: "Hidden summary text",
+    tableOfContents: "Hidden table of contents",
+    hasYoutubeMembership: true,
+    coverImageUrl: "https://example.com/hidden-cover.jpg",
+    isActive: true
+  });
+
+  const response = await request(app).get("/");
+
+  assert.equal(response.status, 200);
+  assert.match(response.text, /Compact Product/);
+  assert.match(response.text, /42,000/);
+  assert.match(response.text, new RegExp(`href="/products/${product.id}"`));
+  assert.match(response.text, /class="product-summary"/);
+  assert.match(response.text, /class="button detail-button"/);
+  assert.doesNotMatch(response.text, /Hidden Author/);
+  assert.doesNotMatch(response.text, /Hidden summary text/);
+  assert.doesNotMatch(response.text, /Hidden table of contents/);
+  assert.doesNotMatch(response.text, /hidden-cover\.jpg/);
+  assert.doesNotMatch(response.text, /action="\/order\/direct"/);
+  assert.doesNotMatch(response.text, /action="\/cart\/add"/);
+  close();
+});
+
+test("product detail page shows image and full product information", async () => {
+  const { app, db, close } = await buildTestApp();
+  const product = await db.createProduct({
+    title: "Detailed Product",
+    author: "Visible Author",
+    price: 53000,
+    summary: "Visible summary text",
+    tableOfContents: "Chapter 1\nChapter 2",
+    hasYoutubeMembership: true,
+    coverImageUrl: "https://example.com/detail-cover.jpg",
+    isActive: true
+  });
+
+  const response = await request(app).get(`/products/${product.id}`);
+
+  assert.equal(response.status, 200);
+  assert.match(response.text, /Detailed Product/);
+  assert.match(response.text, /Visible Author/);
+  assert.match(response.text, /53,000/);
+  assert.match(response.text, /Visible summary text/);
+  assert.match(response.text, /Chapter 1/);
+  assert.match(response.text, /detail-cover\.jpg/);
+  assert.match(response.text, /action="\/cart\/add"/);
+  assert.match(response.text, /action="\/order\/direct"/);
+  close();
+});
+
+test("detail button style keeps text visible on a light background", () => {
+  const css = fs.readFileSync(path.join(__dirname, "..", "src", "public", "styles.css"), "utf8");
+
+  assert.match(css, /\.button\.detail-button\s*\{/);
+  assert.match(css, /\.button\.detail-button[\s\S]*background:\s*#fff;/);
+  assert.match(css, /\.button\.detail-button[\s\S]*color:\s*#315fba;/);
+});
+
 test("admin can log in and create a product", async () => {
   const { app, db, close } = await buildTestApp();
   const agent = request.agent(app);
