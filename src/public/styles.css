@@ -227,6 +227,16 @@ pre {
   white-space: nowrap;
 }
 
+.cart-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 10px;
+}
+
+.cart-actions form {
+  display: grid;
+}
+
 .text-button {
   border: 1px solid #cfd6e3;
   border-radius: 5px;
@@ -378,6 +388,10 @@ th {
 
   .product,
   .order-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-actions {
     grid-template-columns: 1fr;
   }
 

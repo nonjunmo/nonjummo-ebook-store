@@ -20,9 +20,12 @@
       <% }) %>
     </ul>
     <div class="total">전체 금액 <strong><%= total.toLocaleString("ko-KR") %>원</strong></div>
-    <form method="post" action="/order/from-cart">
-      <button class="button primary" type="submit">주문하기</button>
-    </form>
+    <div class="cart-actions">
+      <a class="button secondary link-button" href="/">e-book 목록 보기(추가구매)</a>
+      <form method="post" action="/order/from-cart">
+        <button class="button primary" type="submit">주문하기</button>
+      </form>
+    </div>
   <% } %>
 </section>
 

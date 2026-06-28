@@ -207,6 +207,8 @@ test("customer can remove a product from the cart", async () => {
   assert.doesNotMatch(cart.text, /장바구니 취소 교재/);
   assert.match(cart.text, /11,000원/);
   assert.doesNotMatch(cart.text, /33,000원/);
+  assert.match(cart.text, /e-book 목록 보기\(추가구매\)/);
+  assert.match(cart.text, /href="\//);
   close();
 });
 
