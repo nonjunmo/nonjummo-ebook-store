@@ -9,7 +9,13 @@
       <% products.forEach((product) => { %>
         <li>
           <span><%= product.title %></span>
-          <strong><%= product.price.toLocaleString("ko-KR") %>원</strong>
+          <span class="cart-line-actions">
+            <strong><%= product.price.toLocaleString("ko-KR") %>원</strong>
+            <form method="post" action="/cart/remove">
+              <input type="hidden" name="productId" value="<%= product.id %>">
+              <button class="text-button" type="submit">취소</button>
+            </form>
+          </span>
         </li>
       <% }) %>
     </ul>

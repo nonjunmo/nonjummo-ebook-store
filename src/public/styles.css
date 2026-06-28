@@ -214,9 +214,28 @@ pre {
 .order-list li {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 18px;
   padding: 12px 0;
   border-bottom: 1px solid #e5e9f0;
+}
+
+.cart-line-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.text-button {
+  border: 1px solid #cfd6e3;
+  border-radius: 5px;
+  background: #fff;
+  padding: 6px 10px;
+  color: #475569;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
 }
 
 .total {

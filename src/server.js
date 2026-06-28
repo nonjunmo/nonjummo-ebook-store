@@ -90,6 +90,15 @@ function createApp(options = {}) {
     res.redirect("/cart");
   });
 
+  app.post("/cart/remove", (req, res) => {
+    const productId = Number(req.body.productId);
+    req.session.cart = ensureCart(req).filter((id) => Number(id) !== productId);
+    if (Array.isArray(req.session.orderProductIds)) {
+      req.session.orderProductIds = req.session.orderProductIds.filter((id) => Number(id) !== productId);
+    }
+    res.redirect("/cart");
+  });
+
   app.get("/cart", async (req, res, next) => {
     try {
       const products = await db.getProductsByIds(ensureCart(req));

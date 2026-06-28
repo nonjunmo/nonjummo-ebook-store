@@ -174,6 +174,42 @@ test("customer can order directly and sees bank account on order page", async ()
   close();
 });
 
+test("customer can remove a product from the cart", async () => {
+  const { app, db, close } = await buildTestApp();
+  const first = await db.createProduct({
+    title: "장바구니 유지 교재",
+    author: "논준모연구소",
+    price: 11000,
+    summary: "남아야 하는 상품",
+    tableOfContents: "목차",
+    hasYoutubeMembership: false,
+    coverImageUrl: "",
+    isActive: true
+  });
+  const second = await db.createProduct({
+    title: "장바구니 취소 교재",
+    author: "논준모연구소",
+    price: 22000,
+    summary: "삭제되어야 하는 상품",
+    tableOfContents: "목차",
+    hasYoutubeMembership: false,
+    coverImageUrl: "",
+    isActive: true
+  });
+  const agent = request.agent(app);
+
+  await agent.post("/cart/add").type("form").send({ productId: first.id }).expect(302);
+  await agent.post("/cart/add").type("form").send({ productId: second.id }).expect(302);
+  await agent.post("/cart/remove").type("form").send({ productId: second.id }).expect(302);
+
+  const cart = await agent.get("/cart");
+  assert.match(cart.text, /장바구니 유지 교재/);
+  assert.doesNotMatch(cart.text, /장바구니 취소 교재/);
+  assert.match(cart.text, /11,000원/);
+  assert.doesNotMatch(cart.text, /33,000원/);
+  close();
+});
+
 test("admin can mark payment and delivery complete", async () => {
   const { app, db, close } = await buildTestApp();
   const product = await db.createProduct({
